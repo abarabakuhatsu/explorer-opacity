@@ -26,10 +26,6 @@ explorer-opacity.exe install-autostart
 - `explorer-opacity.exe status` — 自動起動・ログ・設定のパスを表示します。
 - `explorer-opacity.exe install-autostart` — Windows 起動時に自動起動するよう登録します。
 
-## 背景
-
-設計判断は [`docs/adr/`](../../adr/) を参照。
-
 ## ライセンス
 
 MIT — 詳細は [LICENSE](../../../LICENSE) を参照。

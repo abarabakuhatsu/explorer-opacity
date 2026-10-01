@@ -26,10 +26,6 @@ explorer-opacity.exe install-autostart
 - `explorer-opacity.exe status` — 显示自动启动、日志和配置路径。
 - `explorer-opacity.exe install-autostart` — 注册为 Windows 启动时自动运行。
 
-## 背景
-
-设计决策请见 [`docs/adr/`](../../adr/)。
-
 ## 许可
 
 MIT — 详见 [LICENSE](../../../LICENSE)。

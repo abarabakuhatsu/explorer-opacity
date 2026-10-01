@@ -33,10 +33,6 @@ explorer-opacity.exe install-autostart
 - `explorer-opacity.exe status` — show autostart, log, and config paths.
 - `explorer-opacity.exe install-autostart` — start the tool automatically with Windows.
 
-## Background
-
-Design decisions live in [`docs/adr/`](docs/adr/).
-
 ## License
 
 MIT — see [LICENSE](./LICENSE).

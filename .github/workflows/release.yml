@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Quality gates
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - name: Resolve version
+        shell: pwsh
+        run: |
+          $ver = (cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages |
+            Where-Object { $_.name -eq 'explorer-opacity' } |
+            Select-Object -First 1 -ExpandProperty version
+          if (-not $ver) { throw "could not read crate version" }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$ver") {
+            throw "tag '$env:GITHUB_REF_NAME' does not match crate version 'v$ver'"
+          }
+          "CRATE_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build (release)
+        run: cargo build --release
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $name = "explorer-opacity-$env:CRATE_VERSION-windows-x64"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path target/release/explorer-opacity.exe -DestinationPath "dist/$name.zip" -Force
+          $hash = (Get-FileHash "dist/$name.zip" -Algorithm SHA256).Hash
+          "$hash  $name.zip" | Set-Content -Encoding ascii "dist/SHA256SUMS.txt"
+          "ASSET_PATH=dist/$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload artifact (dry run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: explorer-opacity-windows-x64
+          path: dist/
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $flags = if ($tag -match '-') { @('--prerelease') } else { @('--latest') }
+          gh release create $tag $env:ASSET_PATH dist/SHA256SUMS.txt --title $tag --generate-notes @flags

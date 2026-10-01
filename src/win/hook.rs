@@ -16,10 +16,10 @@ use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::System::Threading::CreateMutexW;
 use windows_sys::Win32::UI::Shell::ShellExecuteW;
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW, IsWindow,
-    KillTimer, PostQuitMessage, RegisterClassW, RegisterShellHookWindow, RegisterWindowMessageW,
-    SetTimer, TranslateMessage, HSHELL_WINDOWCREATED, MSG, SW_SHOWNORMAL, WM_DESTROY, WM_HOTKEY,
-    WM_TIMER, WNDCLASSW, WS_EX_TOOLWINDOW, WS_POPUP,
+    CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, IsWindow, KillTimer,
+    PostQuitMessage, RegisterClassW, RegisterShellHookWindow, RegisterWindowMessageW, SetTimer,
+    TranslateMessage, HSHELL_WINDOWCREATED, MSG, SW_SHOWNORMAL, WM_CLOSE, WM_DESTROY,
+    WM_ENDSESSION, WM_HOTKEY, WM_TIMER, WNDCLASSW, WS_EX_TOOLWINDOW, WS_POPUP,
 };
 
 const SWEEP_TIMER_ID: usize = 1;
@@ -248,6 +248,7 @@ fn on_hotkey(id: i32) {
 }
 
 fn on_tray(hwnd: HWND, lparam: LPARAM) {
+    logln!("tray event lparam={lparam:#x}");
     if !tray::is_menu_event(lparam) {
         return;
     }
@@ -257,8 +258,10 @@ fn on_tray(hwnd: HWND, lparam: LPARAM) {
         return;
     };
     let Some(command) = tray::show_menu(hwnd, enabled, autostart, log_enabled) else {
+        logln!("tray menu dismissed without selection");
         return;
     };
+    logln!("tray command: {command:?}");
     apply_command(command);
 }
 
@@ -288,10 +291,9 @@ fn apply_command(command: tray::MenuCommand) {
         }
         OpenLog => open_log(),
         Exit => {
-            if let Some(hwnd) = with_app(|a| a.hwnd) {
-                unsafe {
-                    DestroyWindow(hwnd);
-                }
+            with_app(|a| a.shutdown());
+            unsafe {
+                PostQuitMessage(0);
             }
             return;
         }
@@ -356,6 +358,15 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
         if wparam as u32 == HSHELL_WINDOWCREATED {
             on_window_created(lparam as HWND);
         }
+        return 0;
+    }
+    if msg == WM_CLOSE {
+        with_app(|a| a.shutdown());
+        PostQuitMessage(0);
+        return 0;
+    }
+    if msg == WM_ENDSESSION {
+        with_app(|a| a.shutdown());
         return 0;
     }
     if msg == WM_DESTROY {

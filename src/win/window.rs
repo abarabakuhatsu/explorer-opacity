@@ -5,7 +5,8 @@ use crate::logln;
 use windows_sys::Win32::Foundation::{BOOL, HWND, LPARAM, TRUE};
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     EnumWindows, GetClassNameW, GetLayeredWindowAttributes, GetWindowLongPtrW,
-    SetLayeredWindowAttributes, SetWindowLongPtrW, GWL_EXSTYLE, LWA_ALPHA, WS_EX_LAYERED,
+    SetLayeredWindowAttributes, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, LWA_ALPHA,
+    SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WS_EX_LAYERED,
 };
 
 /// Stable integer handle used as a map key.
@@ -112,18 +113,76 @@ pub fn set_layered_alpha(hwnd: HWND, alpha: u8) -> bool {
     unsafe { SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA) != 0 }
 }
 
+/// Force the window to recompute its non-client area after a style change.
+fn force_frame(hwnd: HWND) {
+    unsafe {
+        SetWindowPos(
+            hwnd,
+            std::ptr::null_mut(),
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+        );
+    }
+}
+
+/// Make a window fully opaque (best effort).
+fn make_opaque(hwnd: HWND) {
+    unsafe {
+        SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+    }
+}
+
 /// Re-apply the previous alpha, or remove `WS_EX_LAYERED` if we added it.
 pub fn restore_alpha(hwnd: HWND, state: &AlphaState) {
     unsafe {
+        // Make it opaque first so the change is visible even if the style stays.
+        make_opaque(hwnd);
         if state.added_layered {
             let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
             SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex & !(WS_EX_LAYERED as isize));
+            force_frame(hwnd);
         } else if state.prev_flags != 0 {
             SetLayeredWindowAttributes(hwnd, state.prev_key, state.prev_alpha, state.prev_flags);
         } else {
             logln!(
-                "restore_alpha: original layered attributes unknown for hwnd {hwnd:p}; leaving as-is"
+                "restore_alpha: original layered attributes unknown for hwnd {hwnd:p}; set opaque"
             );
         }
     }
+}
+
+/// One-shot recovery: clear our transparency from any matching window that is
+/// still layered with a non-opaque `LWA_ALPHA`. Returns the number restored.
+pub fn force_restore_matching(cfg: &Config) -> usize {
+    let mut count = 0;
+    for hwnd in matching_windows(cfg) {
+        unsafe {
+            let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+            if (ex & WS_EX_LAYERED as isize) == 0 {
+                continue;
+            }
+            let mut key: u32 = 0;
+            let mut alpha: u8 = 0;
+            let mut flags: u32 = 0;
+            if GetLayeredWindowAttributes(hwnd, &mut key, &mut alpha, &mut flags) != 0
+                && flags & LWA_ALPHA != 0
+                && alpha == 255
+            {
+                // Already fully opaque; leave it alone.
+                continue;
+            }
+            make_opaque(hwnd);
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex & !(WS_EX_LAYERED as isize));
+            force_frame(hwnd);
+            count += 1;
+            logln!(
+                "force_restore: cleared layered style for {}",
+                class_name(hwnd)
+            );
+        }
+    }
+    count
 }

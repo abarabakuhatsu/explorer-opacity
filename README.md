@@ -37,16 +37,6 @@ explorer-opacity.exe install-autostart
 
 Design decisions live in [`docs/adr/`](docs/adr/).
 
-## Components
-
-| Component | Scope | Docs |
-|---|---|---|
-| `explorer-opacity.exe` | Resident tool: tray, hotkeys, shell hook, message loop | [ADR-0002](docs/adr/0002-event-driven-vs-polling.md) |
-| `window.rs` | Window enumeration and layered-alpha apply/restore | [ADR-0001](docs/adr/0001-alpha-vs-backdrop.md) |
-| `config.rs` | `explorer-opacity.toml` parsing and validation | [ADR-0006](docs/adr/0006-logging-config.md) |
-| `logging.rs` | Optional file logging, stored next to the exe | [ADR-0006](docs/adr/0006-logging-config.md) |
-| `autostart.rs` | Per-user autostart via `HKCU\...\Run` | |
-
 ## License
 
 MIT — see [LICENSE](./LICENSE).

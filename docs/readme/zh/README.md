@@ -30,16 +30,6 @@ explorer-opacity.exe install-autostart
 
 设计决策请见 [`docs/adr/`](../../adr/)。
 
-## 组件
-
-| 组件 | 职责 | 文档 |
-|---|---|---|
-| `explorer-opacity.exe` | 常驻主体（系统托盘、快捷键、shell hook、消息循环） | [ADR-0002](../../adr/0002-event-driven-vs-polling.md) |
-| `window.rs` | 窗口枚举与 layered alpha 的应用/还原 | [ADR-0001](../../adr/0001-alpha-vs-backdrop.md) |
-| `config.rs` | `explorer-opacity.toml` 的读取与校验 | [ADR-0006](../../adr/0006-logging-config.md) |
-| `logging.rs` | 可选的日志文件，保存在可执行文件旁 | [ADR-0006](../../adr/0006-logging-config.md) |
-| `autostart.rs` | 通过 `HKCU\...\Run` 的用户级自动启动 | |
-
 ## 许可
 
 MIT — 详见 [LICENSE](../../../LICENSE)。

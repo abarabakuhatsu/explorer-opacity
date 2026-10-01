@@ -1,5 +1,7 @@
 //! Tray icon and context menu.
 
+use crate::logln;
+
 use windows_sys::Win32::Foundation::{HWND, POINT};
 use windows_sys::Win32::UI::Shell::{
     Shell_NotifyIconW, NIF_ICON, NIF_MESSAGE, NIF_TIP, NIM_ADD, NIM_DELETE, NIM_MODIFY,
@@ -122,6 +124,7 @@ pub fn show_menu(
         );
         PostMessageW(hwnd, 0, 0, 0);
         DestroyMenu(menu);
+        logln!("tray menu returned {selected}");
 
         match selected as usize {
             CMD_TOGGLE => Some(MenuCommand::Toggle),

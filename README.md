@@ -1,11 +1,11 @@
-[English](./README.md) | [日本語](./docs/readme/ja/README.md) | [繁體中文](./docs/readme/zh/README.md)
-
 <p align="center">
   <a href="https://github.com/abarabakuhatsu/explorer-opacity/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/abarabakuhatsu/explorer-opacity/ci.yml?branch=main&style=flat&logo=github"></a>
   <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/abarabakuhatsu/explorer-opacity?style=flat"></a>
   <img alt="Platform: Windows 10 / 11" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat&logo=windows&logoColor=white">
   <img alt="Rust 2021 edition" src="https://img.shields.io/badge/rust-2021%20edition-000000?style=flat&logo=rust">
 </p>
+
+[English](./README.md) | [日本語](./docs/readme/ja/README.md) | [繁體中文](./docs/readme/zh/README.md)
 
 # explorer-opacity
 

@@ -3,19 +3,45 @@
 use crate::logln;
 
 use windows_sys::Win32::Foundation::{HWND, POINT};
+use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::UI::Shell::{
     Shell_NotifyIconW, NIF_ICON, NIF_MESSAGE, NIF_TIP, NIM_ADD, NIM_DELETE, NIM_MODIFY,
     NOTIFYICONDATAW,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    AppendMenuW, CreatePopupMenu, DestroyMenu, GetCursorPos, LoadIconW, PostMessageW,
-    SetForegroundWindow, TrackPopupMenu, IDI_APPLICATION, MF_CHECKED, MF_SEPARATOR, MF_STRING,
-    TPM_RETURNCMD, TPM_RIGHTBUTTON, WM_APP, WM_CONTEXTMENU, WM_RBUTTONUP,
+    AppendMenuW, CreatePopupMenu, DestroyMenu, GetCursorPos, LoadIconW, LoadImageW, PostMessageW,
+    SetForegroundWindow, TrackPopupMenu, IDI_APPLICATION, IMAGE_ICON, LR_DEFAULTSIZE, LR_SHARED,
+    MF_CHECKED, MF_SEPARATOR, MF_STRING, TPM_RETURNCMD, TPM_RIGHTBUTTON, WM_APP, WM_CONTEXTMENU,
+    WM_RBUTTONUP,
 };
 
 /// Custom message id used for tray callbacks.
 pub const WM_TRAYICON: u32 = WM_APP + 100;
 const TRAY_UID: u32 = 1;
+
+/// Resource id of the application icon embedded by `build.rs`.
+pub const APP_ICON_ID: u16 = 1;
+
+/// Load the application icon. Falls back to the generic icon if the resource is
+/// missing.
+pub fn app_icon() -> windows_sys::Win32::UI::WindowsAndMessaging::HICON {
+    unsafe {
+        let module = GetModuleHandleW(std::ptr::null());
+        let icon = LoadImageW(
+            module,
+            APP_ICON_ID as usize as *const u16,
+            IMAGE_ICON,
+            0,
+            0,
+            LR_DEFAULTSIZE | LR_SHARED,
+        );
+        if icon.is_null() {
+            LoadIconW(std::ptr::null_mut(), IDI_APPLICATION)
+        } else {
+            icon
+        }
+    }
+}
 
 const CMD_TOGGLE: usize = 1;
 const CMD_OPACITY_UP: usize = 2;
@@ -57,7 +83,7 @@ pub fn add(hwnd: HWND, tip: &str) -> bool {
     let mut nid = base_data(hwnd);
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     nid.uCallbackMessage = WM_TRAYICON;
-    nid.hIcon = unsafe { LoadIconW(std::ptr::null_mut(), IDI_APPLICATION) };
+    nid.hIcon = app_icon();
     copy_wide(&mut nid.szTip, tip);
     unsafe { Shell_NotifyIconW(NIM_ADD, &nid) != 0 }
 }

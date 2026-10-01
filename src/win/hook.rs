@@ -424,7 +424,7 @@ pub fn run() {
             cbClsExtra: 0,
             cbWndExtra: 0,
             hInstance: module,
-            hIcon: std::ptr::null_mut(),
+            hIcon: tray::app_icon(),
             hCursor: std::ptr::null_mut(),
             hbrBackground: std::ptr::null_mut(),
             lpszMenuName: std::ptr::null(),

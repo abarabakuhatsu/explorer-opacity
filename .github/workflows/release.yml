@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload artifact (dry run)
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: explorer-opacity-windows-x64
           path: dist/
@@ -68,5 +68,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = $env:GITHUB_REF_NAME
-          $flags = if ($tag -match '-') { @('--prerelease') } else { @('--latest') }
+          $flags = @()
+          if ($tag -match '-') { $flags += '--prerelease' } else { $flags += '--latest' }
           gh release create $tag $env:ASSET_PATH dist/SHA256SUMS.txt --title $tag --generate-notes @flags

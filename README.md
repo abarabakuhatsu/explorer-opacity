@@ -59,15 +59,35 @@ decrease = "Ctrl+Alt+Down"
 [targets]
 include = ["CabinetWClass"]
 exclude = ["Progman", "WorkerW", "Shell_TrayWnd", "TaskManagerWindow"]
+
+[logging]
+enabled = true          # false でログを一切書かない
+path = ""               # 空 = exe の隣の explorer-opacity.log
 ```
 
 - `opacity` は 10〜100 にクランプされます（0 はウィンドウが見えなくなるため禁止）。
 - クラス判定の規則: `exclude` が最優先。`include` が非空ならそれだけを対象。`include` が空なら
   `exclude` 以外すべてが対象。
 - 設定はトレイメニューの「Reload config」または再起動で反映されます。
-- 不正な設定は既定値で起動し、`%LOCALAPPDATA%\explorer-opacity\explorer-opacity.log` に記録
-  されます。
+- 不正な設定は既定値で起動し、ログに記録されます。
 - 旧バージョンの `mode` / `[mode_options]` が残っていても無視され、読み込みは失敗しません。
+
+## ログ（`[logging]`）
+
+- `enabled = false` でログ出力を完全に無効化（ファイルも作りません）。
+- `path` が空なら **exe と同じフォルダ** の `explorer-opacity.log` に出力します。
+- `path` の解釈:
+  - 相対パスは exe フォルダ起点（例 `logs` → `<exe>\logs`）
+  - `%LOCALAPPDATA%` などの環境変数を展開（未知の `%…%` はそのまま）
+  - 末尾が `\` `/`、または既存ディレクトリなら、その配下に `explorer-opacity.log` を付加
+  - それ以外はファイルパスとしてそのまま使用
+- 例（旧来の AppData に戻す場合）:
+  ```toml
+  [logging]
+  path = "%LOCALAPPDATA%\\explorer-opacity\\explorer-opacity.log"
+  ```
+- ログは 1 MB を超えると起動時にリセットされます。書き込みに失敗しても本体は動作を続けます。
+- ログ無効時はトレイの「Open log」項目は表示されません。
 
 ## 方式
 
@@ -105,6 +125,9 @@ Enabled / Increase opacity / Decrease opacity / Reload config / Start with Windo
 - 強制終了（タスクマネージャー等）では復元処理が走りません。Explorer を再起動すると元に戻り
   ます。
 - 未署名 exe のため SmartScreen の警告が出る場合があります（「詳細情報」→「実行」）。
+- 既定のログ出力先は exe と同じフォルダです。Program Files など書き込み不可の場所に置いた
+  場合、ログは保存されません（本体は動作を続けます）。`[logging] path` で書き込み可能な場所を
+  指定してください。
 
 ## 構成
 

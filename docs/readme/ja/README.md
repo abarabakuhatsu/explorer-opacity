@@ -33,12 +33,14 @@ explorer-opacity.exe
 explorer-opacity.exe status
 explorer-opacity.exe install-autostart
 explorer-opacity.exe uninstall-autostart
+explorer-opacity.exe restore
 ```
 
 - `explorer-opacity.exe` — 常駐を開始します（初回は `explorer-opacity.toml` を生成）。
 - `explorer-opacity.exe status` — 自動起動・ログ・設定のパスを表示します。
 - `explorer-opacity.exe install-autostart` — Windows 起動時に自動起動するよう登録します。
 - `explorer-opacity.exe uninstall-autostart` — 自動起動の登録を解除します。
+- `explorer-opacity.exe restore` — Explorer の残留した透過を解除します（復旧用）。
 
 ## 設定
 
@@ -84,7 +86,7 @@ Enabled / Increase opacity / Decrease opacity / Reload config / Start with Windo
 - **SmartScreen の警告**: exe は未署名のため警告が出ることがあります。「詳細情報」→「実行」を選びます。
 - **透明にならない**: 対象は `CabinetWClass`（ファイル エクスプローラー）のみです。`enabled` / `opacity` を確認し、`explorer-opacity.exe status` を実行します。
 - **ログが出ない**: exe のフォルダが書込不可（Program Files 等）の可能性があります。`[logging] path` に書込可能な場所を指定します。
-- **クラッシュ後に透過が残る**: 強制終了では復元されません。Explorer を再起動すると元に戻ります。
+- **クラッシュ後に透過が残る**: `explorer-opacity.exe restore` を実行するか、Explorer を再起動して元に戻します。
 - **ホットキーが効かない**: 他アプリと競合している可能性があります。設定で変更します。
 
 ## 既知の制限

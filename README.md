@@ -41,12 +41,14 @@ explorer-opacity.exe
 explorer-opacity.exe status
 explorer-opacity.exe install-autostart
 explorer-opacity.exe uninstall-autostart
+explorer-opacity.exe restore
 ```
 
 - `explorer-opacity.exe` — start the resident tool (creates `explorer-opacity.toml` on first run).
 - `explorer-opacity.exe status` — show autostart, log, and config paths.
 - `explorer-opacity.exe install-autostart` — start the tool automatically with Windows.
 - `explorer-opacity.exe uninstall-autostart` — remove the autostart entry.
+- `explorer-opacity.exe restore` — clear leftover transparency from Explorer windows (recovery).
 
 ## Configuration
 
@@ -92,7 +94,7 @@ Enabled / Increase opacity / Decrease opacity / Reload config / Start with Windo
 - **SmartScreen warning**: the executable is unsigned, so Windows may warn. Choose "More info" → "Run anyway".
 - **Nothing becomes translucent**: only `CabinetWClass` (File Explorer) windows are targeted. Check `enabled`/`opacity` and run `explorer-opacity.exe status`.
 - **No log file**: the exe folder may be read-only (e.g. Program Files). Set `[logging] path` to a writable location.
-- **Left translucent after a crash**: force-killing the process skips restore. Restart Explorer to reset the affected windows.
+- **Left translucent after a forced kill**: run `explorer-opacity.exe restore` (or restart Explorer) to reset the affected windows.
 - **Hotkeys do nothing**: another app may use the same chord; change them in the config.
 
 ## Known limitations

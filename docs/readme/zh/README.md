@@ -33,12 +33,14 @@ explorer-opacity.exe
 explorer-opacity.exe status
 explorer-opacity.exe install-autostart
 explorer-opacity.exe uninstall-autostart
+explorer-opacity.exe restore
 ```
 
 - `explorer-opacity.exe` — 启动常驻工具（首次运行会生成 `explorer-opacity.toml`）。
 - `explorer-opacity.exe status` — 显示自动启动、日志和配置路径。
 - `explorer-opacity.exe install-autostart` — 注册为 Windows 启动时自动运行。
 - `explorer-opacity.exe uninstall-autostart` — 移除自动启动项。
+- `explorer-opacity.exe restore` — 清除资源管理器残留的透明效果（恢复用）。
 
 ## 配置
 
@@ -84,7 +86,7 @@ Enabled / Increase opacity / Decrease opacity / Reload config / Start with Windo
 - **SmartScreen 警告**：可执行文件未签名，Windows 可能提示。选择“更多信息”→“仍要运行”。
 - **没有变透明**：仅针对 `CabinetWClass`（文件资源管理器）窗口。检查 `enabled`/`opacity`，并运行 `explorer-opacity.exe status`。
 - **没有日志文件**：可执行文件所在目录可能不可写（如 Program Files）。将 `[logging] path` 设为可写位置。
-- **崩溃后仍为半透明**：强制结束进程会跳过还原。重启 Explorer 可恢复。
+- **崩溃后仍为半透明**：运行 `explorer-opacity.exe restore`（或重启 Explorer）以恢复。
 - **快捷键无效**：可能与其他应用冲突。在配置中修改。
 
 ## 已知限制

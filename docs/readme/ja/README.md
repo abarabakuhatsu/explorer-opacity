@@ -1,4 +1,4 @@
-[English](../../../README.md) | [日本語](./README.md) | [繁體中文](../zh/README.md)
+[English](../../../README.md) | [日本語](./README.md) | [简体中文](../zh/README.md)
 
 # explorer-opacity
 

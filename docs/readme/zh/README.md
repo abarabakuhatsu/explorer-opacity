@@ -1,20 +1,20 @@
-[English](../../../README.md) | [日本語](../ja/README.md) | [繁體中文](./README.md)
+[English](../../../README.md) | [日本語](../ja/README.md) | [简体中文](./README.md)
 
 # explorer-opacity
 
-在 Windows 上讓檔案總管（Explorer）視窗保持半透明的輕量常駐工具。
-僅針對 `CabinetWClass` 視窗，不會影響桌面與工作列。
-以 Rust 撰寫的單一可攜式執行檔，無需執行階段相依。
+在 Windows 上让文件资源管理器（Explorer）窗口保持半透明的轻量常驻工具。
+仅针对 `CabinetWClass` 窗口，不影响桌面和任务栏。
+使用 Rust 编写的单一便携式可执行文件，无运行时依赖。
 
-## 安裝
+## 安装
 
 ```powershell
 cargo build --release
 ```
 
-- `cargo build --release` — 建置發行版執行檔至 `target\release\explorer-opacity.exe`。
+- `cargo build --release` — 构建发行版可执行文件到 `target\release\explorer-opacity.exe`。
 
-## 使用方式
+## 使用方法
 
 ```powershell
 explorer-opacity.exe
@@ -22,24 +22,24 @@ explorer-opacity.exe status
 explorer-opacity.exe install-autostart
 ```
 
-- `explorer-opacity.exe` — 啟動常駐工具（首次執行會產生 `explorer-opacity.toml`）。
-- `explorer-opacity.exe status` — 顯示自動啟動、記錄與設定路徑。
-- `explorer-opacity.exe install-autostart` — 註冊為 Windows 啟動時自動執行。
+- `explorer-opacity.exe` — 启动常驻工具（首次运行会生成 `explorer-opacity.toml`）。
+- `explorer-opacity.exe status` — 显示自动启动、日志和配置路径。
+- `explorer-opacity.exe install-autostart` — 注册为 Windows 启动时自动运行。
 
 ## 背景
 
-設計決策請見 [`docs/adr/`](../../adr/)。
+设计决策请见 [`docs/adr/`](../../adr/)。
 
-## 元件
+## 组件
 
-| 元件 | 職責 | 文件 |
+| 组件 | 职责 | 文档 |
 |---|---|---|
-| `explorer-opacity.exe` | 常駐主體（系統匣、快速鍵、shell hook、訊息迴圈） | [ADR-0002](../../adr/0002-event-driven-vs-polling.md) |
-| `window.rs` | 視窗列舉與 layered alpha 的套用/還原 | [ADR-0001](../../adr/0001-alpha-vs-backdrop.md) |
-| `config.rs` | `explorer-opacity.toml` 的讀取與驗證 | [ADR-0006](../../adr/0006-logging-config.md) |
-| `logging.rs` | 可選的檔案記錄，儲存於執行檔旁 | [ADR-0006](../../adr/0006-logging-config.md) |
-| `autostart.rs` | 透過 `HKCU\...\Run` 的使用者層級自動啟動 | |
+| `explorer-opacity.exe` | 常驻主体（系统托盘、快捷键、shell hook、消息循环） | [ADR-0002](../../adr/0002-event-driven-vs-polling.md) |
+| `window.rs` | 窗口枚举与 layered alpha 的应用/还原 | [ADR-0001](../../adr/0001-alpha-vs-backdrop.md) |
+| `config.rs` | `explorer-opacity.toml` 的读取与校验 | [ADR-0006](../../adr/0006-logging-config.md) |
+| `logging.rs` | 可选的日志文件，保存在可执行文件旁 | [ADR-0006](../../adr/0006-logging-config.md) |
+| `autostart.rs` | 通过 `HKCU\...\Run` 的用户级自动启动 | |
 
-## 授權
+## 许可
 
-MIT — 詳見 [LICENSE](../../../LICENSE)。
+MIT — 详见 [LICENSE](../../../LICENSE)。

@@ -5,7 +5,7 @@
   <img alt="Rust 2021 edition" src="https://img.shields.io/badge/rust-2021%20edition-000000?style=flat&logo=rust">
 </p>
 
-[English](./README.md) | [日本語](./docs/readme/ja/README.md) | [繁體中文](./docs/readme/zh/README.md)
+[English](./README.md) | [日本語](./docs/readme/ja/README.md) | [简体中文](./docs/readme/zh/README.md)
 
 # explorer-opacity
 

@@ -6,6 +6,30 @@ Windows のファイル エクスプローラー（Explorer）のウィンドウ
 対象は `CabinetWClass` のみで、デスクトップとタスクバーには触れない。
 Rust 製の単一ポータブル exe で、ランタイム依存はない。
 
+## インストール
+
+```powershell
+cargo build --release
+```
+
+- `cargo build --release` — リリース版バイナリを `target\release\explorer-opacity.exe` にビルドします。
+
+## 使い方
+
+```powershell
+explorer-opacity.exe
+explorer-opacity.exe status
+explorer-opacity.exe install-autostart
+```
+
+- `explorer-opacity.exe` — 常駐を開始します（初回は `explorer-opacity.toml` を生成）。
+- `explorer-opacity.exe status` — 自動起動・ログ・設定のパスを表示します。
+- `explorer-opacity.exe install-autostart` — Windows 起動時に自動起動するよう登録します。
+
+## 背景
+
+設計判断は [`docs/adr/`](../../adr/) を参照。
+
 ## 構成
 
 | コンポーネント | 役割 | ドキュメント |
@@ -15,25 +39,6 @@ Rust 製の単一ポータブル exe で、ランタイム依存はない。
 | `config.rs` | `explorer-opacity.toml` の読み書きと検証 | [ADR-0006](../../adr/0006-logging-config.md) |
 | `logging.rs` | exe の隣に保存する任意のファイルログ | [ADR-0006](../../adr/0006-logging-config.md) |
 | `autostart.rs` | `HKCU\...\Run` によるユーザー単位の自動起動 | |
-
-## インストール
-
-```powershell
-cargo build --release
-# 生成物: target\release\explorer-opacity.exe
-```
-
-## 使い方
-
-```powershell
-explorer-opacity.exe                 # 常駐開始（explorer-opacity.toml を生成）
-explorer-opacity.exe status
-explorer-opacity.exe install-autostart
-```
-
-## 背景
-
-設計判断は [`docs/adr/`](../../adr/) を参照。
 
 ## ライセンス
 

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Lightweight resident tool that keeps File Explorer windows translucent on Windows"
 license = "MIT"
+repository = "https://github.com/abarabakuhatsu/explorer-opacity"
 
 [lib]
 name = "explorer_opacity"

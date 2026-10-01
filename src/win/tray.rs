@@ -77,7 +77,12 @@ pub fn remove(hwnd: HWND) {
 }
 
 /// Show the context menu and translate the selection.
-pub fn show_menu(hwnd: HWND, enabled: bool, autostart: bool) -> Option<MenuCommand> {
+pub fn show_menu(
+    hwnd: HWND,
+    enabled: bool,
+    autostart: bool,
+    log_enabled: bool,
+) -> Option<MenuCommand> {
     unsafe {
         let menu = CreatePopupMenu();
         if menu.is_null() {
@@ -97,7 +102,9 @@ pub fn show_menu(hwnd: HWND, enabled: bool, autostart: bool) -> Option<MenuComma
             CMD_AUTOSTART,
             "Start with Windows",
         );
-        append(menu, MF_STRING, CMD_OPEN_LOG, "Open log");
+        if log_enabled {
+            append(menu, MF_STRING, CMD_OPEN_LOG, "Open log");
+        }
         append(menu, MF_SEPARATOR, 0, "");
         append(menu, MF_STRING, CMD_EXIT, "Exit");
 

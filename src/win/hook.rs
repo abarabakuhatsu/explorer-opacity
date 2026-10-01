@@ -189,6 +189,7 @@ impl App {
         self.cfg = cfg;
         self.enabled = self.cfg.enabled;
         self.autostart = autostart::points_at_self();
+        crate::logging::configure(&self.cfg.logging);
         self.register_hotkeys();
         if self.enabled {
             self.sweep();
@@ -250,10 +251,12 @@ fn on_tray(hwnd: HWND, lparam: LPARAM) {
     if !tray::is_menu_event(lparam) {
         return;
     }
-    let Some((enabled, autostart)) = with_app(|a| (a.enabled, a.autostart)) else {
+    let Some((enabled, autostart, log_enabled)) =
+        with_app(|a| (a.enabled, a.autostart, a.cfg.logging.enabled))
+    else {
         return;
     };
-    let Some(command) = tray::show_menu(hwnd, enabled, autostart) else {
+    let Some(command) = tray::show_menu(hwnd, enabled, autostart, log_enabled) else {
         return;
     };
     apply_command(command);
@@ -370,7 +373,8 @@ fn wide(s: &str) -> Vec<u16> {
 
 /// Entry point: create the hidden window and run the message loop until exit.
 pub fn run() {
-    crate::logging::init();
+    let (cfg, config_error) = config::load_or_create();
+    crate::logging::configure(&cfg.logging);
 
     // Restore before an abort so a panic in the message loop cannot leave a
     // window permanently translucent.
@@ -385,7 +389,6 @@ pub fn run() {
         });
     }));
 
-    let (cfg, config_error) = config::load_or_create();
     if let Some(e) = config_error {
         logln!("{e}");
     }

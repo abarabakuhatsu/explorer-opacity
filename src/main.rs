@@ -41,7 +41,13 @@ fn main() {
                 "autostart points at this exe: {}",
                 autostart::points_at_self()
             );
-            println!("log: {}", explorer_opacity::logging::log_path().display());
+            let (cfg, _) = explorer_opacity::config::load();
+            let log_path = explorer_opacity::logging::resolve_log_path(
+                &explorer_opacity::logging::exe_dir(),
+                &cfg.logging.path,
+            );
+            println!("logging enabled: {}", cfg.logging.enabled);
+            println!("log: {}", log_path.display());
             println!(
                 "config: {}",
                 explorer_opacity::config::config_path().display()

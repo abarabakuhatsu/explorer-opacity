@@ -75,6 +75,25 @@ impl Default for Targets {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Logging {
+    /// When `false`, no log file is written at all.
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    /// Log destination. Empty means `<exe dir>\explorer-opacity.log`.
+    #[serde(default)]
+    pub path: String,
+}
+
+impl Default for Logging {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            path: String::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default = "default_version")]
     pub config_version: u32,
@@ -88,6 +107,8 @@ pub struct Config {
     pub hotkeys: Hotkeys,
     #[serde(default)]
     pub targets: Targets,
+    #[serde(default)]
+    pub logging: Logging,
 }
 
 fn default_version() -> u32 {
@@ -112,6 +133,7 @@ impl Default for Config {
             opacity_step: DEFAULT_OPACITY_STEP,
             hotkeys: Hotkeys::default(),
             targets: Targets::default(),
+            logging: Logging::default(),
         }
     }
 }
@@ -121,6 +143,7 @@ impl Config {
     pub fn sanitize(&mut self) {
         self.opacity = crate::filter::clamp_opacity(self.opacity);
         self.opacity_step = self.opacity_step.clamp(1, 50);
+        self.logging.path = self.logging.path.trim().to_string();
         if self.targets.include.is_empty() && self.targets.exclude.is_empty() {
             // Both empty would mean "apply to every window". Restore the safe
             // default instead of surprising the user.
@@ -154,26 +177,12 @@ pub fn config_path() -> PathBuf {
     config_dir().join(DEFAULT_CONFIG_FILE)
 }
 
-/// Load the config, creating a default file when missing.
+/// Load the config without touching the filesystem beyond reading.
 ///
-/// On a parse error the defaults are returned and the error is reported back so
-/// the caller can warn the user; the broken file is left untouched.
-pub fn load_or_create() -> (Config, Option<String>) {
+/// Missing file yields the defaults with no error; a parse error yields the
+/// defaults plus a message and leaves the broken file untouched.
+pub fn load() -> (Config, Option<String>) {
     let path = config_path();
-    if !path.exists() {
-        let cfg = Config::default();
-        let text = cfg.to_toml_string();
-        if text.is_empty() {
-            return (cfg, Some("failed to serialize default config".to_string()));
-        }
-        if let Err(e) = std::fs::write(&path, text) {
-            return (
-                cfg,
-                Some(format!("could not write {}: {e}", path.display())),
-            );
-        }
-        return (cfg, None);
-    }
     match std::fs::read_to_string(&path) {
         Ok(text) => match Config::from_toml_str(&text) {
             Ok(cfg) => (cfg, None),
@@ -182,11 +191,32 @@ pub fn load_or_create() -> (Config, Option<String>) {
                 Some(format!("invalid config {}: {e}", path.display())),
             ),
         },
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => (Config::default(), None),
         Err(e) => (
             Config::default(),
             Some(format!("could not read {}: {e}", path.display())),
         ),
     }
+}
+
+/// Load the config, creating a default file when missing.
+pub fn load_or_create() -> (Config, Option<String>) {
+    let path = config_path();
+    if path.exists() {
+        return load();
+    }
+    let cfg = Config::default();
+    let text = cfg.to_toml_string();
+    if text.is_empty() {
+        return (cfg, Some("failed to serialize default config".to_string()));
+    }
+    if let Err(e) = std::fs::write(&path, text) {
+        return (
+            cfg,
+            Some(format!("could not write {}: {e}", path.display())),
+        );
+    }
+    (cfg, None)
 }
 
 #[cfg(test)]
@@ -200,6 +230,25 @@ mod tests {
         assert!(c.enabled);
         assert!(c.targets.include.contains(&"CabinetWClass".to_string()));
         assert_eq!(c.targets.exclude.len(), 4);
+    }
+
+    #[test]
+    fn logging_defaults_to_enabled_and_exe_dir() {
+        let c = Config::default();
+        assert!(c.logging.enabled);
+        assert!(c.logging.path.is_empty());
+    }
+
+    #[test]
+    fn logging_section_parses_and_trims() {
+        let text = r#"
+[logging]
+enabled = false
+path = "  C:\\logs\\eo.log  "
+"#;
+        let c = Config::from_toml_str(text).unwrap();
+        assert!(!c.logging.enabled);
+        assert_eq!(c.logging.path, r"C:\logs\eo.log");
     }
 
     #[test]
